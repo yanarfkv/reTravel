@@ -3,15 +3,20 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class PostsController extends AbstractController
 {
-    #[Route('/api/posts', name: 'add_post', methods: 'POST')]
+
+    #[Route('/api/posts/new_post', name: 'add_post', methods: 'POST')]
     public function index(ManagerRegistry $doctrine, Request $request): Response
     {
         $em = $doctrine->getManager();
@@ -33,4 +38,35 @@ class PostsController extends AbstractController
             'message' => 'Пост успешно добавлен',
         ]);
     }
+
+    #[Route('/api/posts/get_all_posts', name: 'get_posts', methods: 'GET')]
+    public function get_posts(SerializerInterface $serializer, EntityManagerInterface $entityManager): Response
+    {
+        $posts = $entityManager->getRepository(Post::class)->findAll();
+        return new Response(
+            $serializer->serialize($posts, 'json')
+        );
+    }
+
+    #[Route('/api/posts/get/{id}', name: 'get_post', methods: 'GET')]
+    public function get_post(string $id, SerializerInterface $serializer, EntityManagerInterface $entityManager): Response
+    {
+        $post = $entityManager->getRepository(Post::class)->findById($id);
+
+        return new Response(
+            $serializer->serialize($post, 'json')
+        );
+    }
+
+    #[Route('/api/posts/get_by_user/{user_id}', name: 'get_posts_by_user', methods: 'GET')]
+    public function get_posts_by_user(string $user_id, SerializerInterface $serializer, EntityManagerInterface $entityManager): Response
+    {
+        $user = $entityManager->getRepository(User::class)->findOneBy(['id' => $user_id]);
+        $post = $entityManager->getRepository(Post::class)->findBy(['author' => $user]);
+
+        return new Response(
+            $serializer->serialize($post, 'json')
+        );
+    }
+
 }

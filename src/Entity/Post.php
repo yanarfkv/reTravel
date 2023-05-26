@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PostRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -29,6 +31,14 @@ class Post
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
+
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: PostImages::class)]
+    private Collection $postImages;
+
+    public function __construct()
+    {
+        $this->postImages = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -91,6 +101,36 @@ class Post
     public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PostImages>
+     */
+    public function getPostImages(): Collection
+    {
+        return $this->postImages;
+    }
+
+    public function addPostImage(PostImages $postImage): self
+    {
+        if (!$this->postImages->contains($postImage)) {
+            $this->postImages->add($postImage);
+            $postImage->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostImage(PostImages $postImage): self
+    {
+        if ($this->postImages->removeElement($postImage)) {
+            // set the owning side to null (unless already changed)
+            if ($postImage->getPost() === $this) {
+                $postImage->setPost(null);
+            }
+        }
 
         return $this;
     }

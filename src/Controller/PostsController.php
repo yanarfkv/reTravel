@@ -3,15 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Entity\PostImages;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class PostsController extends AbstractController
 {
@@ -20,19 +23,20 @@ class PostsController extends AbstractController
     public function index(ManagerRegistry $doctrine, Request $request): Response
     {
         $em = $doctrine->getManager();
-        $decoded = json_decode($request->getContent());
 
         $post = new Post();
         $date = new \DateTime();
         $user = $this->getUser();
         $post->setAuthor($user);
-        $post->setHeader($decoded->header);
-        $post->setText($decoded->text);
-        $post->setLocation($decoded->location);
+        $post->setHeader($request->get('header'));
+        $post->setText($request->get('text'));
+        $post->setLocation($request->get('location'));
         $post->setDate($date);
 
         $em->persist($post);
         $em->flush();
+
+        // TODO: Реализация загрузки изображений
 
         return $this->json([
             'message' => 'Пост успешно добавлен',

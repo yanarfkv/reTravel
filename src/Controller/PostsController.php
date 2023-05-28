@@ -64,10 +64,10 @@ class PostsController extends AbstractController
         );
     }
 
-    #[Route('/api/posts/get_by_user/{user_id}', name: 'get_posts_by_user', methods: 'GET')]
-    public function get_posts_by_user(string $user_id, SerializerInterface $serializer, EntityManagerInterface $entityManager): Response
+    #[Route('/api/posts/get_by_user/', name: 'get_posts_by_user', methods: 'GET')]
+    public function get_posts_by_user(SerializerInterface $serializer, EntityManagerInterface $entityManager): Response
     {
-        $user = $entityManager->getRepository(User::class)->findOneBy(['id' => $user_id]);
+        $user = $this->getUser();
         $post = $entityManager->getRepository(Post::class)->findBy(['author' => $user]);
 
         return new Response(

@@ -32,13 +32,8 @@ class Post
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\OneToMany(mappedBy: 'post', targetEntity: PostImages::class)]
-    private Collection $postImages;
-
-    public function __construct()
-    {
-        $this->postImages = new ArrayCollection();
-    }
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $file_path = null;
 
     public function getId(): ?int
     {
@@ -105,32 +100,14 @@ class Post
         return $this;
     }
 
-    /**
-     * @return Collection<int, PostImages>
-     */
-    public function getPostImages(): Collection
+    public function getFilePath(): ?string
     {
-        return $this->postImages;
+        return $this->file_path;
     }
 
-    public function addPostImage(PostImages $postImage): self
+    public function setFilePath(?string $file_path): self
     {
-        if (!$this->postImages->contains($postImage)) {
-            $this->postImages->add($postImage);
-            $postImage->setPost($this);
-        }
-
-        return $this;
-    }
-
-    public function removePostImage(PostImages $postImage): self
-    {
-        if ($this->postImages->removeElement($postImage)) {
-            // set the owning side to null (unless already changed)
-            if ($postImage->getPost() === $this) {
-                $postImage->setPost(null);
-            }
-        }
+        $this->file_path = $file_path;
 
         return $this;
     }

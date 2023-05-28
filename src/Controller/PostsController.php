@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Post;
-use App\Entity\PostImages;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -20,20 +19,36 @@ class PostsController extends AbstractController
 {
 
     #[Route('/api/posts/new_post', name: 'add_post', methods: 'POST')]
-    public function index(ManagerRegistry $doctrine, Request $request): Response
+    public function index(SluggerInterface $slugger, ManagerRegistry $doctrine, Request $request): Response
     {
         $em = $doctrine->getManager();
 
-        $decoded = json_decode($request->getContent());
+//        $decoded = json_decode($request->getContent());
 
         $post = new Post();
         $date = new \DateTime();
         $user = $this->getUser();
         $post->setAuthor($user);
-        $post->setHeader($decoded->header);
-        $post->setText($decoded->text);
-        $post->setLocation($decoded->location);
+        $post->setHeader($request->get('header'));
+        $post->setText($request->get('text'));
+        $post->setLocation($request->get('location'));
         $post->setDate($date);
+
+        $image = $request->files->get('image');
+        if ($image) {
+            $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$image->guessExtension();
+
+            try {
+                $image->move(
+                    $this->getParameter('posts_directory'),
+                    $newFilename
+                );
+            } catch (FileException $e) {}
+
+            $post->setFilePath('/uploads/posts_images/'. $newFilename);
+        }
 
         $em->persist($post);
         $em->flush();

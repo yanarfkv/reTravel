@@ -33,9 +33,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Post::class)]
     private Collection $posts;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?Chat $chat = null;
-
     public function __construct()
     {
         $this->posts = new ArrayCollection();
@@ -141,15 +138,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getChat(): ?Chat
-    {
-        return $this->chat;
-    }
 
-    public function setChat(?Chat $chat): self
-    {
-        $this->chat = $chat;
-
-        return $this;
-    }
 }

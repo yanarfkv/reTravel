@@ -4,5 +4,6 @@ Download [Composer](https://getcomposer.org/) and use the composer binary instal
 ```
 git clone https://github.com/yanarfkv/reTravel.git
 cd reTravel
-composer install
+composer install --ignore-platform-reqs
+php bin/console lexik:jwt:generate-keypair
 ```

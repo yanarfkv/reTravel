@@ -47,13 +47,16 @@ class PostsController extends AbstractController
                 );
             } catch (FileException $e) {}
 
-            $post->setFilePath('/uploads/posts_images/'. $newFilename);
+            $path = $this->getParameter('posts_directory') . '/' . $newFilename;
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+            $post->setFilePath($base64);
         }
 
         $em->persist($post);
         $em->flush();
-
-        // TODO: Реализация загрузки изображений
 
         return $this->json([
             'message' => 'Пост успешно добавлен',

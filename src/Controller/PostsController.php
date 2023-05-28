@@ -24,13 +24,15 @@ class PostsController extends AbstractController
     {
         $em = $doctrine->getManager();
 
+        $decoded = json_decode($request->getContent());
+
         $post = new Post();
         $date = new \DateTime();
         $user = $this->getUser();
         $post->setAuthor($user);
-        $post->setHeader($request->get('header'));
-        $post->setText($request->get('text'));
-        $post->setLocation($request->get('location'));
+        $post->setHeader($decoded->header);
+        $post->setText($decoded->text);
+        $post->setLocation($decoded->location);
         $post->setDate($date);
 
         $em->persist($post);
